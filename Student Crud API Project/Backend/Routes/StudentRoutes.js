@@ -36,7 +36,15 @@ const upload = multer({
 // Get All Students
 router.get('/', async (req, res) => {
   try {
-    const students = await StudentModel.find();
+    const search = req.query.search || '';
+
+    const query = {
+      $or: [
+        { first_name: { $regex: search, $options: 'i' } },
+        { last_name: { $regex: search, $options: 'i' } },
+      ],
+    };
+    const students = await StudentModel.find(query);
     res.json(students);
   } catch (err) {
     res.status(500).json({ Message: err.message });
@@ -97,7 +105,9 @@ router.put('/:id', upload.single('profile_pic'), async (req, res) => {
       req.body.profile_pic = req.file.filename;
     }
 
-    const updatedStudent = await StudentModel.findByIdAndUpdate(req.params.id, req.body, { new: true });
+    const updatedStudent = await StudentModel.findByIdAndUpdate(req.params.id, req.body, {
+      new: true,
+    });
 
     res.json(updatedStudent);
   } catch (err) {
