@@ -14,7 +14,14 @@ app.use(express.json());
 
 // Routes 
 app.use('/api/students',StudentRoutes);
-
+app.use((error,req,res,next)=>{
+  if(error instanceof MulterError){
+    return res.status(400).send(`Image Error: ${error.message} : ${error.code}`)
+  }else if(error){
+    return res.status(500).send(`Something went wrong: ${error.message}`)
+  }
+  next()
+})
 
 // Server
 const PORT = process.env.PORT;
